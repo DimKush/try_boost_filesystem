@@ -52,8 +52,9 @@ namespace PathWorker
         for(auto &i : filesThreads)
             i.join();
 
-        for(auto &i : packersVector)
-            std::cout << i << '\n';
+        filesThreads.clear();
+
+        
     }
 
     void process_file(const std::string &fileName, Packer<float> &packer_)
@@ -81,8 +82,6 @@ namespace PathWorker
 
             file.close();
             packer_.count();
-
-            std::cout.precision(4);
         }
         catch(const std::exception& e)
         {
@@ -107,5 +106,18 @@ namespace PathWorker
         tmpContainer.push_back(str.substr(beginPos));
         
         return tmpContainer;
+    }
+
+    void write_in_file(const fs::path &workingPath, const std::vector<Packer<float>> & packerVector_)
+    {
+        std::string fileName = std::string{workingPath.string() + "result.out"};
+        std::ofstream fileOut;
+        
+        fileOut.open(fileName);
+        
+        for(auto i : packerVector_)
+        {
+            fileOut << i << '\n';
+        }
     }
 }   
