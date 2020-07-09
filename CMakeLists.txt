@@ -15,7 +15,8 @@ find_package(Boost REQUIRED COMPONENTS system filesystem)
 #add library
 add_library(experim SHARED 
                 ${PROJECT_SOURCE_DIR}/path_worker/path_worker.h
-                ${PROJECT_SOURCE_DIR}/path_worker/path_worker.cpp)
+                ${PROJECT_SOURCE_DIR}/path_worker/path_worker.cpp
+                ${PROJECT_SOURCE_DIR}/packer/Packer.h)
 
 #add executable
 add_executable(experimental_fs.out 

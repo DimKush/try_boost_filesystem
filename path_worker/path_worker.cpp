@@ -1,7 +1,10 @@
 #include <exception>
 #include <thread>
+#include <fstream>
+#include <streambuf>
 
 #include"path_worker/path_worker.h"
+
 
 namespace PathWorker
 {
@@ -28,29 +31,81 @@ namespace PathWorker
         }
     }
 
-    void process_directory(fs::path const & workingPath)
+    void process_directory(const fs::path &workingPath)
     {
         std::list<std::string> filesContainer;
         std::vector<std::thread> filesThreads;
+        std::vector<Packer<float>> packersVector;
 
-        std::cout << workingPath.string() << '\n';
+        size_t atCount = 0;
+
         for(fs::recursive_directory_iterator iter(workingPath), iterEnd; iter != iterEnd; ++iter)
-        {
-            filesContainer.emplace_back(iter->path().filename().string());
-        }
+            filesContainer.emplace_back(std::string(iter->path().string()));
+        
+        packersVector.resize(filesContainer.size());
 
-        for(auto i : filesContainer)
+        for(auto i = filesContainer.begin(); i != filesContainer.end() && atCount < filesContainer.size() ; i++, atCount++)
         {
-            filesThreads.push_back(std::thread(process_file, std::ref(i)));
-        }
+            filesThreads.push_back(std::thread(process_file, *i, std::ref(packersVector.at(atCount))));
+        }    
+
         for(auto &i : filesThreads)
-        {
             i.join();
-        }
+
+        for(auto &i : packersVector)
+            std::cout << i << '\n';
     }
 
-    void process_file(std::string const & fileName)
+    void process_file(const std::string &fileName, Packer<float> &packer_)
+    {      
+        try
+        {   
+            std::fstream file(fileName);
+            std::vector<std::string> vect;
+            
+            if(!file)
+                throw std::logic_error("Can't open file.");
+
+            std::string strTmp{std::istreambuf_iterator<char>(file),std::istreambuf_iterator<char>()};
+
+            if(strTmp.empty())
+                throw std::logic_error("No arguments in file.");
+            
+            std::replace(strTmp.begin(), strTmp.end(), '\n', ' ');
+            vect = split(strTmp, ' ');
+
+            packer_.setOperation(std::stoi(vect.at(0)));
+            
+            for(auto i = vect.begin() + 1 ; i != vect.end(); i++)
+                packer_.setContent(std::stof(*i));
+
+            file.close();
+            packer_.count();
+
+            std::cout.precision(4);
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+    }
+    
+    std::vector<std::string> split(std::string const & str, char symbol)
     {
-        std::cout << "I am here " << fileName << '\n';
+        std::vector<std::string> tmpContainer;
+
+        std::string::size_type  beginPos = 0, endPos = str.find_first_of(symbol);
+
+        while(endPos != std::string::npos)
+        {
+            tmpContainer.push_back(str.substr(beginPos,endPos - beginPos));
+
+            beginPos = endPos + 1;
+            endPos = str.find_first_of(symbol, beginPos);
+        }
+
+        tmpContainer.push_back(str.substr(beginPos));
+        
+        return tmpContainer;
     }
 }   
