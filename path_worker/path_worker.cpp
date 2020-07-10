@@ -37,11 +37,17 @@ namespace PathWorker
         std::vector<std::thread> filesThreads;
         std::vector<Packer<float>> packersVector;
 
+        if(fs::exists(workingPath / "result.out"))
+        {   
+            fs::remove(workingPath / "result.out");
+        }
+
         size_t atCount = 0;
 
         for(fs::recursive_directory_iterator iter(workingPath), iterEnd; iter != iterEnd; ++iter)
+        {
             filesContainer.emplace_back(std::string(iter->path().string()));
-        
+        }
         packersVector.resize(filesContainer.size());
 
         for(auto i = filesContainer.begin(); i != filesContainer.end() && atCount < filesContainer.size() ; i++, atCount++)
@@ -51,10 +57,9 @@ namespace PathWorker
 
         for(auto &i : filesThreads)
             i.join();
-
         filesThreads.clear();
-
         
+        write_in_file(workingPath / "result.out", packersVector);
     }
 
     void process_file(const std::string &fileName, Packer<float> &packer_)
@@ -108,16 +113,17 @@ namespace PathWorker
         return tmpContainer;
     }
 
-    void write_in_file(const fs::path &workingPath, const std::vector<Packer<float>> & packerVector_)
+    void write_in_file(const fs::path &workingPathForRes, const std::vector<Packer<float>> & packerVector_)
     {
-        std::string fileName = std::string{workingPath.string() + "result.out"};
         std::ofstream fileOut;
         
-        fileOut.open(fileName);
+        fileOut.open((workingPathForRes).string());
         
         for(auto i : packerVector_)
         {
             fileOut << i << '\n';
         }
+
+        fileOut.close();
     }
 }   

@@ -24,7 +24,7 @@ add_library(experim SHARED
 
 #add executable
 add_executable(experimental_fs.out 
-                ${PROJECT_SOURCE_DIR}/src/main.cpp ${DATA_1} ${DATA_2} ${DATA_3})
+                ${PROJECT_SOURCE_DIR}/src/main.cpp)
 
 file(COPY ${DATA_1} DESTINATION proc/p1)
 file(COPY ${DATA_2} DESTINATION proc/p2)
@@ -44,4 +44,4 @@ set_target_properties(experimental_fs.out experim PROPERTIES
 
 target_link_libraries(experim ${Boost_LIBRARIES})
 
-target_link_libraries(experimental_fs.out experim)
+target_link_libraries(experimental_fs.out experim ${CMAKE_THREAD_LIBS_INIT})
