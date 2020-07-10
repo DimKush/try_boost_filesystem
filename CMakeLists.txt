@@ -35,3 +35,20 @@ set_target_properties(experimental_fs.out experim PROPERTIES
 target_link_libraries(experim ${Boost_LIBRARIES})
 
 target_link_libraries(experimental_fs.out experim)
+
+
+#cmake --build . --target package
+install(TARGETS experimental_fs.out  RUNTIME DESTINATION bin )
+install(TARGETS experim LIBRARY DESTINATION lib )
+
+set(CPACK_GENERATOR DEB)
+
+set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
+
+set(CPACK_PACKAGE_CONTACT dimkysh@gmail.com)
+
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+
+include(CPack)
