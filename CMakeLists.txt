@@ -44,8 +44,7 @@ set_target_properties(experimental_fs.out experim PROPERTIES
 
 target_link_libraries(experim ${Boost_LIBRARIES})
 
-target_link_libraries(experimental_fs.out experim)
-
+target_link_libraries(experimental_fs.out experim ${CMAKE_THREAD_LIBS_INIT})
 
 #cmake --build . --target package
 install(TARGETS experimental_fs.out  RUNTIME DESTINATION bin )
