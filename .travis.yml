@@ -1,0 +1,26 @@
+dist: xenial
+sudo: false #disable sudo in scripts
+language: cpp
+compiler: clang
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    - sourceline: 'deb https://apt.llvm.org/xenial/ llvm-toolchain-xenial-9 main'
+      key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+    packages:
+    - clang-9
+    - cmake
+    - cmake-data
+    - libboost-all-dev
+env: TOOLSET=clang COMPILER=clang++-9 CXXSTD=c++17 TEST_SUITE=misc
+
+before_script:
+    - export CXX="clang++-9"
+    - export CC="clang-9"
+
+script:
+  - cmake .
+  - cmake --build .
+  - cmake --build . --target package
