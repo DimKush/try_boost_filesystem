@@ -101,39 +101,3 @@ public:
         return stream_;
     } 
 };
-
-/*
-template<typename T>
-std::ostream & operator << (std::ostream & stream_, const Packer<T> &packer_)
-{
-    for(auto i : packer_.content)
-    {
-        stream_ << i << ' ';
-    }
-
-     switch(packer_.operation)
-        {
-            case 1:
-            {
-                stream_ << '+' << ' ';
-
-                break;
-            }
-            case 2:
-            {
-                stream_ << '*' << ' ';
-                break;
-            }
-            case 3:
-            {
-               stream_ << "pow" << ' ';
-                break;
-            }
-            default:
-                break;
-        }
-
-    stream_ << "result = " << packer_.result;
-    
-}
-*/
