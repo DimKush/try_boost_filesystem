@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.10)
 
 set(MAJOR_VERSION 0)
 set(MINOR_VERSION 1)
-set(ENV{TRAVIS_BUILD_NUMBER} 1) #plug
 
 configure_file(version.vers version.h)
 
