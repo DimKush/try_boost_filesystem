@@ -14,5 +14,10 @@ int main(int argc, char** argv)
     for(auto &i : thrd)
         i.join();
     
+    for(auto i : pathsContainer)
+    {
+        PathWorker::open_result_file_and_show(i); 
+    }
+
     return 0;
 }

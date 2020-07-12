@@ -126,4 +126,24 @@ namespace PathWorker
 
         fileOut.close();
     }
+
+    void open_result_file_and_show(const fs::path &workingPath)
+    {
+        fs::path workingPathFile = workingPath / "result.txt";
+        std::fstream fileIn;
+        std::string resultContent; 
+
+        fileIn.open(workingPathFile.string());
+        
+        if(!fileIn)
+            throw std::logic_error("Cannot open result file.");
+        
+        while(std::getline(fileIn,resultContent))
+        {
+            std::cout << resultContent << '\n';
+        }
+            
+        fileIn.close();
+    }
 }   
+
