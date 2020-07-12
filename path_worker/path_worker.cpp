@@ -15,7 +15,7 @@ namespace PathWorker
             if(argc == 1)
                 throw std::logic_error("No arguments in program. Please, choose witch catalog need to process. p1, p2 or p3.");
             
-            const fs::path workdir = fs::current_path() / "proc";
+            const fs::path workdir = fs::current_path() / "resources";
 
             std::list<fs::path> pathsContainer;
 
@@ -37,9 +37,9 @@ namespace PathWorker
         std::vector<std::thread> filesThreads;
         std::vector<Packer<float>> packersVector;
 
-        if(fs::exists(workingPath / "result.out"))
+        if(fs::exists(workingPath / "result.txt"))
         {   
-            fs::remove(workingPath / "result.out");
+            fs::remove(workingPath / "result.txt");
         }
 
         size_t atCount = 0;
@@ -59,7 +59,7 @@ namespace PathWorker
             i.join();
         filesThreads.clear();
         
-        write_in_file(workingPath / "result.out", packersVector);
+        write_in_file(workingPath / "result.txt", packersVector);
     }
 
     void process_file(const std::string &fileName, Packer<float> &packer_)
@@ -126,4 +126,24 @@ namespace PathWorker
 
         fileOut.close();
     }
+
+    void open_result_file_and_show(const fs::path &workingPath)
+    {
+        fs::path workingPathFile = workingPath / "result.txt";
+        std::fstream fileIn;
+        std::string resultContent; 
+
+        fileIn.open(workingPathFile.string());
+        
+        if(!fileIn)
+            throw std::logic_error("Cannot open result file.");
+        
+        while(std::getline(fileIn,resultContent))
+        {
+            std::cout << resultContent << '\n';
+        }
+            
+        fileIn.close();
+    }
 }   
+
