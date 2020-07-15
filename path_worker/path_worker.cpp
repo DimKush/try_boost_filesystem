@@ -2,9 +2,12 @@
 #include <thread>
 #include <fstream>
 #include <streambuf>
+#include <condition_variable>
 
-#include"path_worker/path_worker.h"
+#include "path_worker/path_worker.h"
 
+std::condition_variable cv;
+std::mutex cv_m;
 
 namespace PathWorker
 {
@@ -33,9 +36,9 @@ namespace PathWorker
 
     void process_directory(const fs::path &workingPath)
     {
-        std::list<std::string> filesContainer;
         std::vector<std::thread> filesThreads;
         std::vector<Packer<float>> packersVector;
+        std::unordered_multimap <int, const std::fstream> filesMap;
 
         if(fs::exists(workingPath / "result.txt"))
         {   
@@ -46,22 +49,66 @@ namespace PathWorker
 
         for(fs::recursive_directory_iterator iter(workingPath), iterEnd; iter != iterEnd; ++iter)
         {
-            filesContainer.emplace_back(std::string(iter->path().string()));
-        }
-        packersVector.resize(filesContainer.size());
-
-        for(auto i = filesContainer.begin(); i != filesContainer.end() && atCount < filesContainer.size() ; i++, atCount++)
-        {
-            filesThreads.push_back(std::thread(process_file, *i, std::ref(packersVector.at(atCount))));
-        }    
+            filesThreads.emplace_back(std::thread{try_to_open_file_and_get_info, std::string{iter->path().string()}, std::ref(filesMap)} );
+        } 
 
         for(auto &i : filesThreads)
             i.join();
         filesThreads.clear();
         
-        write_in_file(workingPath / "result.txt", packersVector);
+        for(auto &i : filesMap)
+            capture_data_from_file(i);
+
     }
 
+    void try_to_open_file_and_get_info(std::string const &fileName, std::unordered_multimap<int, const std::fstream> & filesMap)
+    {
+        std::fstream file;
+        int fileSize = 0;
+
+        file.open(fileName);
+        
+        if(!file)
+        {
+            std::cerr << "File " << fileName << " doesn't exist.\n";
+            file.close();
+
+            return;
+        }
+        
+        fileSize = fs::file_size(fileName);
+
+        if(fileSize == 0)
+        {
+            std::cerr << "File " << fileName << " is empty.\n";
+            return;  
+        }
+
+        std::lock_guard<std::mutex> lg(cv_m);
+    
+        filesMap.emplace(std::piecewise_construct 
+                        ,std::forward_as_tuple(fileSize)
+                        ,std::forward_as_tuple(fileName));
+        
+        file.close();
+    }
+
+    void capture_data_from_file(std::pair<const int, const std::fstream> &element)
+    {
+        if(element.first >= 1000)
+            process_big_data(element);
+    }
+
+    void process_big_data(std::pair<const int, const std::fstream> &element)
+    {  
+        std::string container1, container2, container3, container4;
+
+        std::fstream &f = const_cast<std::fstream&>(element.second);
+        std::string mainContainer{std::istreambuf_iterator<char>(f),std::istreambuf_iterator<char>()};
+    }
+
+
+    [[deprecated]]
     void process_file(const std::string &fileName, Packer<float> &packer_)
     {      
         try
@@ -94,6 +141,7 @@ namespace PathWorker
         }
     }
     
+    [[deprecated]]
     std::vector<std::string> split(std::string const & str, char symbol)
     {
         std::vector<std::string> tmpContainer;
